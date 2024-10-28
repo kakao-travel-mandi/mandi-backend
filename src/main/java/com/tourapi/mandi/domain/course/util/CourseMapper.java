@@ -7,6 +7,7 @@ import com.tourapi.mandi.domain.course.dto.CourseNameResponseDto;
 import com.tourapi.mandi.domain.course.dto.CourseNearbyListResponseDto;
 import com.tourapi.mandi.domain.course.dto.CourseNearbyResponseDto;
 import com.tourapi.mandi.domain.course.dto.CourseListItemResponseDto;
+import com.tourapi.mandi.domain.course.dto.CoursePreferredListResponseDto;
 import com.tourapi.mandi.domain.course.dto.CourseResponseDto;
 import com.tourapi.mandi.domain.course.entity.Course;
 import com.tourapi.mandi.global.dto.PageInfoDto;
@@ -18,12 +19,36 @@ import org.springframework.data.domain.Page;
 public final class CourseMapper {
     public static CourseListResponseDto toCourseListResponseDto(final Page<Course> page) {
         List<CourseListItemResponseDto> courses = page.stream()
-                .map(CourseListItemResponseDto::new)
+                .map(CourseMapper::toCourseListItemDto)
                 .toList();
 
         return CourseListResponseDto.builder()
                 .pageInfo(new PageInfoDto(page))
                 .courses(courses)
+                .build();
+    }
+
+    public static CoursePreferredListResponseDto toCoursePreferredListResponseDto(final List<Course> courses) {
+        List<CourseListItemResponseDto> coursesPreferred = courses.stream()
+                .map(CourseMapper::toCourseListItemDto)
+                .toList();
+
+        return CoursePreferredListResponseDto.builder()
+                .courses(coursesPreferred)
+                .build();
+    }
+
+    private static CourseListItemResponseDto toCourseListItemDto(final Course course) {
+        return CourseListItemResponseDto.builder()
+                .id(course.getCourseId())
+                .courseName(course.getName())
+                .distance(course.getDistance())
+                .startPointName(course.getStartPoint().getName())
+                .endPointName(course.getEndPoint().getName())
+                .difficulty(course.getDifficulty())
+                .ratingAverage(course.getRatingAverage())
+                .duration(DateTimeUtil.formatHourMinute(course.getDuration()))
+                .imgUrl(course.getImgUrl())
                 .build();
     }
 
@@ -35,11 +60,26 @@ public final class CourseMapper {
 
     public static CourseNearbyListResponseDto toCourseNearbyResponseDto(final List<Course> nearByCourses) {
         List<CourseNearbyResponseDto> courses = nearByCourses.stream()
-                .map(CourseNearbyResponseDto::new)
+                .map(CourseMapper::toCourseNearbyItemDto)
                 .toList();
 
         return CourseNearbyListResponseDto.builder()
                 .courses(courses)
+                .build();
+    }
+
+    private static CourseNearbyResponseDto toCourseNearbyItemDto(final Course course) {
+        return CourseNearbyResponseDto.builder()
+                .id(course.getCourseId())
+                .courseName(course.getName())
+                .distance(course.getDistance())
+                .startPoint(course.getStartPoint())
+                .midPoint(course.getMidPoint())
+                .endPoint(course.getEndPoint())
+                .difficulty(course.getDifficulty())
+                .ratingAverage(course.getRatingAverage())
+                .duration(DateTimeUtil.formatHourMinute(course.getDuration()))
+                .gpxUrl(course.getRouteUrl())
                 .build();
     }
 
